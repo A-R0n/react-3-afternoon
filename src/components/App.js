@@ -4,6 +4,8 @@ import './App.css';
 
 import Header from './Header/Header';
 import Compose from './Compose/Compose';
+import axios from 'axios';
+import Post from './Post/Post';
 
 class App extends Component {
   constructor() {
@@ -19,23 +21,41 @@ class App extends Component {
   }
   
   componentDidMount() {
-
+    axios.get('https://practiceapi.devmountain.com/api/posts').then(res => {
+      this.setState({
+        posts: res.data
+      })
+    })
   }
 
-  updatePost() {
-  
+  updatePost(id, text) {
+    axios.put(`https://practiceapi.devmountain.com/api/posts?id=${ id }`, { text }).then(res => {
+      this.setState({
+        posts: res.data
+      });
+    });
   }
 
-  deletePost() {
-
+  deletePost(id) {
+    axios.delete(`https://practiceapi.devmountain.com/api/posts?id=${ id }`).then(res => {
+      this.setState({
+        posts: res.data
+      });
+    });
   }
 
-  createPost() {
-
+  createPost(text) {
+    axios.post(`https://practiceapi.devmountain.com/api/posts`, { text }).then(res => {
+      this.setState({
+        posts: res.data
+      });
+    });
+    console.log(this.state.posts);
   }
 
   render() {
     const { posts } = this.state;
+    console.log(posts);
 
     return (
       <div className="App__parent">
@@ -43,8 +63,19 @@ class App extends Component {
 
         <section className="App__content">
 
-          <Compose />
-          
+          <Compose
+          createPostFn = { this.createPost } />
+          {
+            posts.map( post => (
+              <Post 
+              key = { post.id } //these are assignment statements that we are going to pass to the child component Post
+              text = { post.text}
+              date = { post.date }
+              id = { post.id }
+              updatePostFn = { this.updatePost }
+              deletePostFn = { this.deletePost }/>
+            ))
+          }
         </section>
       </div>
     );
